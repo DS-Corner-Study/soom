@@ -1,0 +1,456 @@
+5. 구조 분해 할당
+=> 배열 or 객체에서 요소를 해체해 개별 변수에 그 값을 담을 때 사용
+
+let arr = [1,2,3];
+let [one, two, three] = arr;
+
+배열의 길이를 넘는 변수에는 undefinded가 할당됨
+
+let person = {
+name: "숨니",
+age: 20,
+location: "덕성"
+};
+let {name, age, location} = person;
+key를 기준으로 각각 할당된다.
+
+function func({ name, age, location }) {
+  console.log(name, age, location);
+} //name: n, age: a, location: l 같다.
+let person = {
+name: "숨니",
+age: 20,
+location: "덕성"
+};
+
+func(person);
+// 숨니 20 덕성
+
+6.스프레드 연산자와 rest 매개변수
+
+스프레드 연산자 = '...' (전개 연산자)
+반복 가능한 객체의 값을 개별 요소로 분리할 수 있다.
+
+let arrA = [1,2,3];
+let arrB = [...arrA, 4,5,6];
+console.log(arrB); // [1,2,3,4,5,6]
+
+구조 분해 할당: 인수가 1개이며 객체
+스프레드 연산자: 인수 여러 개
+
+rest 매개변수 (나머지 매개변수)
+개별 요소를 배열로 묶을 수 있다.
+
+function func(param, ...rest) {
+  console.log(param);
+  console.log(rest);
+}
+
+func(1, 2, 3, 4); 
+// 1
+// [2,3,4]
+
+!주의사항 
+rest 매개변수는 마지막에 작성해야함!!
+
+7. 배열과 메서드
+push: 배열 맨 끝에 요소를 추가하고 새로운 길이를 반환하는 메서드
+
+let food = ["짜장면, "피자", "치킨"];
+const newLength = food.push("탕수육");
+
+console.log(food); // ["짜장면", "피자", "치킨", "탕수육"]
+console.log`(${newLength}`) //4
+
+pop: 배열의 맨 끝 요소를 제거하고, 제거한 요소를 반환하는 메서드
+
+let food = ["짜장면", "피자", "치킨"];
+const removedItem = food.pop();
+
+console.log(removeItem); // 치킨
+console.log(food); // ["짜장면", "피자"]
+
+빈 배열에서 사용할 경우 undefined 반환
+
+shift: 맨 앞 요소를 제거하고, 제거한 요소를 반환하는 메서드 <-> pop
+
+let food = ["짜장면", "피자", "치킨"];
+const removedItem = food.shift();
+
+console.log(removeItem); // 짜장면
+console.log(food); // ["피자", "치킨"]
+
+unshift: 배열의 맨 앞에 요소를 추가하고, 새로운 길이를 반환하는 메서드
+<-> push
+
+shift와 unshift는 느리다.
+push나 pop을 사용해라.
+
+slice: 기존 배열에서 특정 범위를 잘라 새로운 배열을 반환한다.
+(원본 배열 수정 X)
+
+start는 잘라낼 범위의 시작, end는 잘라낼 범위의 끝을 지정
+but, end의 범위는 end 인덱스 전까지!!!
+
+arr.slice(start, end);
+
+const arr = [1,2,3];
+const sliced = arr.slice(0,2);
+
+console.log(arr); //[1,2,3]
+console.log(sliced); //[1,2]
+
+start만 전달하고 end를 전달하지 않으면 배열 끝까지 잘라낸 배열을 반환
+
+음수를 인덱스로 전달하면, 배열의 맨 끝부터 음수의 절댓값만큼 잘라낸 값을 반환
+const arr = [1,2,3];
+const sliced = arr.slice(-1);
+
+console.log(sliced); //[3]
+
+concat: 서로 다른 배열을 이어 붙여 새 배열을 반환하는 메서드
+(원본 배열 수정 X)
+
+let arrA = [1, 2];
+let arrB = [3, 4];
+let arrC = arrA.concat(arrB); 
+
+console.log(arrC); // [1, 2, 3, 4]
+console.log(arrA); // [1, 2] 
+
+인수로 배열을 전달하면 객체를 하나의 요소로 인식하여 삽입함
+
+let arrA = [1, 2];
+let arrB = { a: 1, b: 2 };
+let arrC = arrA.concat(arrB);
+
+console.log(arrC); // [1, 2, { a: 1, b: 2 } ]
+
+순회 메서드
+forEach: 배열의 모든 요소에 순서대로 접근해 실행하는 메서드
+
+function cb(item, index, array) {
+ //실행할 동작
+}
+arr.forEach(cb);
+
+인수로 함수를 요구하는 메서드!
+item: 현재 순회하는 배열 요소
+index: 현재 순회하는 배열 요소의 인덱스
+arr: 순회 중인 배열
+
+function cb(item, index) {
+console.log(`[${index}]`: `${item}`);
+}
+const arr = [1,2,3];
+arr.forEach(cb);
+// [0]: 1
+// [1]: 2
+// [2]: 3
+
+화살표 함수로 표현
+!!!함수 인수 안에 괄호 두 개!!!
+const arr = [1,2,3];
+arr.forEach((item, index) => {
+console.log(`[${index}]`: `${item}`);
+});
+// [0]: 1
+// [1]: 2
+// [2]: 3
+
+탐색 메서드
+indexOf: 배열에서 찾으려는 요소의 인덱스를 반환하는 메서드
+arr.indexOf(tem, fromIndex);
+iem: 찾으려는 값
+fromIndex: 탐색을 시작하는 인덱스 번호
+
+let arr = [1,2,3];
+console.log(arr.indexOf(1,0); // 0
+console.log(arr.indexOf(1)); // 0
+console.log(arr.indexOf(1, -1)); // 2
+
+fromIndex를 생략하면 처음부터 탐색
+fromIndex의 값이 음수라면 배열의 맨뒤에서부터 탐색 
+
+찾으려는 요소가 배열에 없거나
+fromIndex의 값이 배열의 길이보다 크거나 같을 경우
+==> -1 반환
+
+자료형이 다르면 다른 값
+참조값이 다르면 -1 반환
+console.log(arr.indexOf("3")); // -1
+console.log(arr.indexOf({객체})); // -1
+객체 자료형의 값 탐색 불가!
+
+includes: 배열에 특정 요소가 있는지 판별한다.
+arr.includes(item, fromIndex)
+
+요소가 존재하면 true, 없으면 false
+
+findIndex: 배열에서 찾으려는 요소의 인덱스 번호를 찾아 반환한다.
+인수로 콜백 함수를 전달한다(= 판별 함수)
+
+arr.findIndex( callback(item, index, array) );
+item: 현재 요소
+index: 현재 인덱스
+array: 탐색 대상 배열
+
+function determine(item, idx, arr) {
+if (item % 2 === 0 ) return true;
+else return false;
+}
+let arr = [1,3,5,6];
+let index = arr.findIndex(determine);
+console.log(index) // 3
+
+더 간결하게 화살표 함수!
+let arr = [1,3,5,6];
+let index = arr.findIndex((item) => 
+item % 2 === 0 ? ture : false
+);
+console.log(index); //3
+
+배열에서 찾을 때!
+let arr = [
+{name: "숨니" },
+{name: "왈랄라" }
+];
+let index = arr.findIndex((item) => item.name === "숨니" );
+console.log(index); //0
+
+find: 배열에서 특정 조건을 만족하는 요소를 찾을 때 사용! 
+
+let arr = [
+{name: "숨니" },
+{name: "왈랄라" }
+];
+
+let element = arr.find((item) => item.name === "숨니");
+console.log(element); // {name: "숨니"}
+
+filter: 배열에서 조건을 만족하는 요소만 모아 새로운 배열로 반환하는 메서드
+
+arr.filter( callback(item, index, arr));
+
+let arr = [
+{name: "숨니", hobby: "게임" },
+{name: "왈랄라", hobby: "음악" },
+];
+let filteredArr = arr.filter(
+(item) => item.hobby === "음악"
+);
+console.log(filteredArr);
+
+// (1) [Object]
+
+변형 메서드
+map: 배열 각각의 요소에 대한 함수 호출 결과를 모아 새 배열을 만들어 반환하는 메서드
+arr.map( callback(item, index, array) );
+item: 현재 요소
+index: 인덱스
+array: map 메서드를 호출한 배열
+
+let arr = [1,2,3,4];
+let newArr = arr.map((item) => item * 3);
+
+console.log(newArr); // [3,6,9,12]
+
+객체를 저장하는 배열!
+let arr = [
+{name: "숨니", hobby: "게임" },
+{name: "왈랄라", hobby: "음악" },
+];
+let newArr = arr.map((item) => item.name);
+
+console.log(newArr);
+// (2) ["숨니", "왈랄라"]
+
+sort: 배열의 요소를 정렬할 때 사용하는 메서드
+arr. sort( compare(a,b) )
+이 함수는 비교 함수로 사용됨, but 비교 함수를 생략하면 사전 순, 오름차순으로 정렬
+
+let arr = { "b", "a", "c"];
+arr.sort();
+console.log(arr); // ["a", "b", "c"]
+
+새로운 배열을 반환하는 게 아니라, 기존 배열 요소를 다시 정렬한다.
+
+function compare(a,b) {
+if (a>b) return 1; // a는 b 뒤로 이동
+else if (a<b) return -1; // a는 b 앞으로 이동
+else return 0; //자리 이동 X
+}
+
+let arr = [10, 5, 3];
+arr.sort(compare);
+
+console.log(arr); // [3,5,10]
+
+join: 배열 요소를 모두 연결해 하나의 문자열로 반환한다.
+콤마를 기본 값으로 제공한다.
+arr.join(separator)
+
+let arr = ["안녕", "나는", "숨니"];
+console.log(arr.join()): // 안녕,나는,숨니
+console.log(arr.join("-")); //안녕-나는-숨니
+
+reduce: 배열 요소를 모두 순회하면서 인수로 제공한 함수를 실행한다.
+(단 하나의 결과값만 반환하는 메서드)
+arr.reduce ( (acc, item, index, array) = > {
+//실행할 문장
+}, initial );
+
+인수로 콜백 함수와 initial(초기값) 전달
+acc: 누산기(accumulator) 이전 함수의 호출 결과를 저장
+초기값 == initial
+item: 현재 배열 요소
+index: 현재 배열 인덱스
+array: reduce 메서드를 호출한 배열
+initial이 없으면 배열의 첫 번째 요소가 acc의 초기값
+
+let arr = [1,2,3,4,5];
+let result = arr.reduce ((acc, item) => acc + item, 0);
+console.log(Result); //15
+
+8. Date 객체와 날짜
+
+Date는 배열이나 함수처럼 특수한 목적을 수행하기 위해 기능이 추가된 객체이다.
+날짜와 시간을 저장한다, 리터럴 문법이 아닌 생성자 문법으로만 만들 수 있다.
+
+협정 세계시: UTC 1970년 1월 1일 0시 0분 0초를 기준한다.
+let date = new Date();
+console.log(date);
+//Mon Oct 02 2023 15:40:28 GMT+0900 (한국 표준시)
+
+let date = new Date(0);
+console.log(date);
+//Thu Jan 01 1970 09:00:00 GMT+0900 (한국 표준시)
+
+타임 스탬프: UTC+0시를 기준으로 흘러간 밀리초(ms)의 시간을 의미한다.
+24 * 3600 * 1000: 하루를 의미한다.
+
+문자열로 특정 날짜 전달하기
+let date = new Date("2023-10-02/00:00:00");
+console.log(date);
+// Mon Oct 02 2023 00:00:00 GMT+0900 (한국 표준시)
+
+숫자로 특정 날짜 전달하기
+let date = new Date(2023, 10, 2,0,0,0);
+console.log(date);
+// Thu Nov 02 2023 00:00:00 GMT+0900 (한국 표준시)
+해당 월의 시작이 0부터 시작한다.
+10월은 9로 전달해야한다.
+
+타임 스탬프로 날짜를 생성하기
+let date = new Date(2023, 9, 2);
+let timeStamp = date.getTime();
+console.log(timeStamp); // 1696172400000
+
+let dateClone = new Date(timeStamp);
+console.log(dateClone); // Mon Oct 02 2023 00:00:00 GMT+0900 (한국 표준시)
+
+getFullYear: Date 객체에서 연도 반환한다.
+let date = new Date(2023, 9, 2);
+console.log(date.getFullYear()); // 2023
+
+getMonth: 0~11로 표현되는 월을 반환한다.
+let date = new Date(2023, 9, 2);
+console.log(date.getMonth()); // 9
+
+getDate: 일을 반환한다.
+let date = new Date(2023, 9, 2);
+console.log(date.Date()); // 2
+
+getDay: 0~6으로 표현되는 요일을 반환한다.
+let date = new Date(2023, 9, 2);
+console.log(date.getDay()); // 1(월요일)
+
+getHours: 시간을 반환하는 메서드
+getMinutes: 분을 반환하는 메서드
+getSeconds: 초를 반환하는 메서드
+getMiliseconds: 밀리초를 반환하는 메서드
+
+let date = new Date(2023, 9, 2, 15, 55, 30, 2);
+
+console.log(date.getHours()); // 15
+console.log(date.getMinutes()); // 55
+console.log(date.getSeconds()); // 30
+console.log(date.getMilliseconds()); // 2
+
+setFullYear: 객체의 연도를 수정할 때 사용하는 메서드
+let date = new Date(2023, 9, 2);
+date.setFullYear(2022);
+console.log(date); 
+// Sun Oct 02 2022 00:00:00 GMT+0900 (한국 표준시)
+
+setMonth, setDate, setHours, setMinutes, setSeconds 등등
+
+toString: 현재 저장된 시간을 문자열로 반환한다.
+const today = new Date(2023, 9, 2, 16);
+
+toDateString: 현재 날짜만 출력하는 메서드
+toLocaleString: '현지화'된 날짜와 시간을 반환한다.
+toLocaleDateString: '현지화'된 날짜를 반환한다.
+
+let today = new Date(2023, 9, 2, 16);
+console.log(today.toLocaleString()); 
+// 2023. 10. 2. 오후 4:00:00 
+
+이 달의 가장 늦은 시간이 다음 달 0일 23시 59분 59초인 이유
+일을 0으로 설정하면 해당 월 바로 이전 월의 마지막 날을 의미한다.
+2023년 11월 0일은 2023년 10월의 마지막 날이다.
+
+9. 비동기 처리
+비동기 처리를 이용하면 오래 걸리는 작업이 종료될 때까지
+기다리지 않고 다음 작업을 수행하는 유연한 프로그래밍이 가능하다.
+
+순차적으로 코드를 실행하는 것을 동기라고 한다.
+
+함수 setTimeout을 이용하면 비동기적을 처리할 수 있다.
+setTimeout(function() {
+console.log(1);
+}, 3000); // 3000밀리초 == 3초만큼 기다린 다음 콜백 함수 실행
+console.log(2);
+//2
+//1
+
+간결하게 화살표 함수로 표현
+setTimeout(() => {
+console.log(1);
+}, 3000);
+console.log(2);
+
+콜백 함수로 비동기 처리하기
+ex) 카페에서 음료 제조가 완료되면 주문 번호로 고객에게 알리는 것
+
+프로미스 객체를 이용해 비동기 처리하기 ?_? 이해가 잘 안된다.
+프로미스: 비동기 처리를 목적으로 제공되는 자바스크립트 내장 객체
+
+대기: 작업 미완료
+성공: 작업 성공적 완료
+실패: 작업 실패
+
+const promise = new Promise(실행함수);
+
+const promise = new Promise(function (resolve, reject) {
+  setTimeout(() => {
+    console.log("안녕");
+  }, 500);
+});
+
+resolve: 비동기 작업의 상태를 성공으로 바꾸는 함수
+reject: 비동기 작업의 상태를 실패로 바꾸는 함수
+
+const promise = new Promise(function (resolve, reject) {
+setTimeout(() => {
+reject("실패");
+}, 500);
+});
+
+promise.them(function(res) {
+console.log(res);
+}):
+
+promise.catch(function(err) {
+console.log(err);
+});
