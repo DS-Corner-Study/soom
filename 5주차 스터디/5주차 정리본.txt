@@ -1,0 +1,223 @@
+[1. 컴포넌트]
+
+리액트: 컴포넌트 기반 UI 라이브러리
+
+<첫 컴포넌트 만들기>
+클래식 (X)
+함수로 컴포넌트 만들기 (O)
+-> 함수를 선언하고 해당 함수가 HTML 요소를 반환한다.
+
+!페이지에서 헤더 역할 담당
+function Header() { 
+  return (
+    <header>
+      <h1>header</h1>
+    </header>
+  ); 
+}
+
+!화살표 함수
+const Header = () => {
+  return (
+    <header>
+      <h1>header</h1>
+    </header>
+  ); 
+}
+
+!컴포넌트 이름은 항상 대문자
+HTML 태그와 구분하기 위해서
+
+<컴포넌트를 페이지에 렌더링 하기>
+<Header />
+JSX의 닫힘 규칙: 닫는 표기 필수
+
+컴포넌트의 계층 구조 == 컴포넌트 트리
+
+<컴포넌트 별로 파일 분리하기>
+src/component
+파일명.js
+내보내기: export default 파일명;
+불러오기: import 파일명 from "./component/파일명";
+
+[2. JSX]
+
+JSX: 자바스크립트와 HTML 태그를 섞어 사용하는 문법,
+자바스크립트의 확장 문법
+
+산술 표현식)
+const numA = 1;
+const numB = 2;
+<h2>{numA + numB}</h2>
+
+--> 3을 렌더링한다.
+
+문자열 표현식)
+const strA = "안녕";
+const strB = "리액트";
+<h2>{strA + strB}</h2>
+
+--> 안녕리액트를 렌더링한다.
+
+논리 표현식)
+const boolA = true;
+const boolB = false;
+<h2>{boolA && boolB}</h2>
+
+--> 렌더링 X
+
+<h2>{String(boolA && boolB)}</h2>
+
+--> false를 렌더링한다.
+
+사용할 수 없는 값)
+오류 발생
+
+닫힘 규칙)
+반드시 닫힘 태그 사용 필요</~>
+
+최상위 태그 규칙)
+반드시 최상위 태그로 감싸야한다.
+if, 최상위 태그 아무것도 X
+--> import React from "react"; 선언 후
+<React.Fragment> 사용하기 or <> 빈 태그 사용하기
+
+조건부 렌더링)
+조건식의 결과에 따라 각기 다른 값을 페이지에 렌더링하는 것!
+
+삼항 연산자 활용 -> {num}은(는) {num % 2 === 0 ? "짝수" : "홀수"}입니다.
+조건문 활용 ->  if (num % 2 === 0) {
+    return <div>{num}은(는) 짝수입니다</div>;
+  } else {
+    return <div>{num}은(는) 홀수입니다</div>;
+  }
+
+인라인 스타일링)
+JSX 문법으로 HTML의 style 속성을 이용해 직접 스타일을 정의하는 방법
+-->  <div style={{ backgroundColor: "red", color: "blue" }}>
+
+스타일 파일 분리)
+동일 폴더 안에 Body.css 생성 
+.body {
+  background-color: green;
+  color: blue;
+}
+
+Body.js에 import "./Body.css"; 선언 후
+<div className="body">
+
+[3. 컴포넌트에 값 전달하기]
+
+Props: 속성
+
+Props로 값 전달하기)
+ex- App에서 Body 컴포넌트에 변수 name을 Props로 전달
+const name = "조수민";
+<Body name={name} />
+
+ex- 전달 받은 Props를 Body 컴포넌트에서 사용
+function Body(props) { 
+  console.log(props); 
+  return <div className="body">{props.name}</div>; 
+}
+export default Body;
+
+Props로 여러 개의 값 전달하기)
+ex- 전달하기
+<Body name={name} location={"덕성"} />
+
+ex-전달받기
+function Body(props) {
+  console.log(props);
+  return (
+    <div className="body">
+      {props.name}은 {props.location}에 거주합니다
+    </div>
+  );
+}
+export default Body;
+
+구조 분해 할당으로 여러 개의 값 사용하기)
+function Body(props) {
+  const { name, location } = props;
+  console.log(name, location);
+  return (
+    <div className="body">
+      {name}은 {location}에 거주합니다
+    </div>
+  );
+
+or 
+
+function Body({ name, location }) {
+  console.log(name, location);
+  return (
+    <div className="body">
+      {name}은 {location}에 거주합니다
+    </div>
+  );
+}
+export default Body;
+
+스프레드 연산자로 여러 개의 값 쉽게 전달하기)
+function App() {
+  const BodyProps = {
+    name: "이정환",
+    location: "부천시",
+  };
+
+  return (
+    <div className="App">
+      <Header />
+      <Body {...BodyProps} />
+
+tips!
+<Body {...BodyProps} />: 
+BodyProps 객체의 모든 속성을 Body 컴포넌트로 전달한다.
+
+
+기본 값 설정하기)
+  const BodyProps = {
+    name: "이정환",
+    location: "부천시",
+    favorList: ["파스타", "빵", "떡볶이"], 
+  };
+
+function Body({ name, location, favorList }) { 
+  console.log(name, location, favorList); 
+  return (
+    <div className="body">
+      {name}은 {location}에 거주합니다.
+      <br />
+      {favorList.length}개의 음식을 좋아합니다.
+
+if, favorList 미 작성 시 오류 발생
+
+--> 해결 방안: Body.defaultProps = { 
+  favorList: [],
+};
+
+Props로 컴포넌트 전달하기)
+ex - 전달 하기
+function ChildComp() { 
+  return <div>child component</div>;
+}
+
+function App() {
+  return (
+    <div className="App">
+      <Header />
+      <Body>
+        <ChildComp /> 
+      </Body>
+      <Footer />
+    </div>
+  );
+}
+
+ex- 전달 받기
+function Body({ children }) { 
+  console.log(children); 
+  return <div className="body">{children}</div>; 
+}
+export default Body;
