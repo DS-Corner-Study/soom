@@ -1,0 +1,147 @@
+[이벤트 처리하기]
+
+이벤트 핸들링: 이벤트가 발생하면 특정 코드가 동작하도록 만드는 작업
+function Body() {
+  function handleOnClick() { ①
+    alert("버튼을 클릭하셨군요!");
+  }
+
+  return (
+    <div className="body">
+      <button onClick={handleOnClick}>클릭하세요</button> ②
+    </div>
+  );
+}
+export default Body;
+
+함수 handleOnClick --> 메시지 창 띄우기
+버튼을 클릭하면 함수 호출
+
+// HTML, 자바스크립트를 사용할 때의 이벤트 핸들러 설정
+<button onclick="handleOnClick()">
+Click Me!
+</button>
+
+// 리액트를 사용할 때의 이벤트 핸들러 설정
+<button onClick={handleOnClick}>클릭하세요</button>
+
+[컴포넌트와 상태]
+리액트 state 사용법
+
+함수 useState로 사용한다.
+
+import { useState } from "react"; ①
+
+function Body() {
+  const [count, setCount] = useState(0); ②
+  return (
+    <div>
+      <h2>{count}</h2>
+    </div>
+  );
+}
+
+export default Body;
+
+리액트가 제공하는 state를 만드는 함수 -> useState
+초기값으로 0 제공, count == 변수, setCount == 함수
+
+set 함수로 State 값 변경하기
+
+import { useState } from "react";
+
+function Body() {
+  const [count, setCount] = useState(0); 
+
+  const onIncrease = () => { ①
+    setCount(count + 1);
+  };
+
+  return (
+    <div>
+      <h2>{count}</h2>
+      <button onClick={onIncrease}>+</button>
+    </div>
+  );
+}
+export default Body;
+
+count에 0 전달, 버튼을 클릭하면 count+1을 함
+
+State로 사용자 입력 관리하기
+<input>, <button> 등등
+
+[useRef 사용하기]
+Ref는 Reference의 줄임말로 참조라는 뜻
+
+
+
+import { useState } from "react";
+
+function Body() {
+  const [text, setText] = useState("");
+
+  const handleOnChange = (e) => {
+    setText(e.target.value);
+  };
+
+  const handleOnClick = () => {
+    alert(text);
+  };
+
+  return (
+    <div>
+      <input value={text} onChange={handleOnChange} />
+      <button onClick={handleOnClick}>작성 완료</button>
+    </div>
+  );
+}
+export default Body;
+
+
+useRef로 입력 폼 초기화하기
+import { useRef, useState } from "react";
+
+function Body() {
+  (...)
+  const handleOnClick = () => {
+    alert(text);
+    textRef.current.value = "";
+  };
+  (...)
+}
+export default Body;
+
+-->  value 값을 공백 문자열로 초기화합니다.
+
+
+useRef로 포커스하기
+미입력 or 정한 길이보다 짧으면 해당 폼을 포커스(focus)하여 사용자의 추가 입력을 유도합니다.
+
+import { useRef, useState } from "react";
+
+function Body() {
+  const [text, setText] = useState("");
+  const textRef = useRef();
+
+  const handleOnChange = (e) => {
+    setText(e.target.value);
+  };
+
+  const handleOnClick = () => {
+    if (text.length < 5) {
+      textRef.current.focus(); ①
+    } else {
+      alert(text);
+      setText(""); ②
+    }
+  };
+
+  return (
+    <div>
+      <input ref={textRef} value={text} onChange={handleOnChange} />
+      <button onClick={handleOnClick}>작성 완료</button>
+    </div>
+  );
+}
+export default Body;
