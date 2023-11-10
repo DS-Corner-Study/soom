@@ -1,0 +1,548 @@
+
+1. 프로젝트 준비하기
+App 컴포넌트: Viewer와 Controller 컴포넌트를 감싸는 템플릿이다.
+Viewer 컴포넌트: 현재의 카운트를 표시한다.
+Controller 컴포넌트: 카운트를 제어할 수 있는 기능을 제공한다.
+
+
+리액트 앱 만들기
+npx create-react-app .
+
+
+다음 파일을 전부 삭제한다.
+
+src/App.test.js
+src/logo.svg
+src/reportWebVitals.js
+src/setupTest.js
+
+
+index.js를 수정한다.
+import React from "react";
+import ReactDOM from "react-dom/client";
+import "./index.css";
+import App from "./App";
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App />);
+
+
+
+App.js를 수정한다.
+import "./App.css";
+
+function App() {
+  return <div className="App"></div>;
+}
+
+export default App;
+
+
+리액트 앱을 실행시킨다.
+npm run start
+
+
+
+2. UI 구현하기
+UI는 사용자 인터페이스라는 뜻으로, 웹 페이지에서 사용자와 상호작용하는 요소를 말한다.
+
+
+Viewer 컴포넌트 만들기
+src에 component 폴더를 만들고, Viewer.js를 생성한다.
+const Viewer = () => {
+  return (
+    <div>
+      <div>현재 카운트: </div>
+      <h1>0</h1>
+    </div>
+  );
+};
+export default Viewer;
+
+
+
+App.js 파일을 다음과 같이 수정한다.
+import "./App.css";
+import Viewer from "./component/Viewer"; 
+
+function App() {
+  return (
+    <div className="App">
+      <h1>Simple Counter</h1> 
+      <section>
+        <Viewer /> 
+      </section>
+    </div>
+  );
+}
+
+export default App;
+
+
+
+Controller 컴포넌트 만들기
+카운트를 늘리거나 줄이는 Controller 컴포넌트를 만든다.
+const Controller = () => {
+  return (
+    <div>
+      <button>-1</button>
+      <button>-10</button>
+      <button>-100</button>
+      <button>+100</button>
+      <button>+10</button>
+      <button>+1</button>
+    </div>
+  );
+};
+export default Controller;
+
+
+
+App.js 파일을 다음과 같이 수정한다.
+import "./App.css";
+import Controller from "./component/Controller"; 
+import Viewer from "./component/Viewer";
+
+function App() {
+  return (
+    <div className="App">
+      <h1>Simple Counter</h1>
+      <section>
+        <Viewer />
+      </section>
+      <section>
+        <Controller /> 
+      </section>
+    </div>
+  );
+}
+
+export default App;
+
+
+
+컴포넌트 스타일링하기
+App.css 파일을 다음과 같이 수정한다.
+body {
+  padding: 20px;
+}
+
+.App {
+  margin: 0 auto;
+  width: 500px;
+}
+
+.App > section { 
+  padding: 20px;
+  background-color: rgb(245, 245, 245);
+  border: 1px solid rgb(240, 240, 240);
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+
+.App > section은 App 컴포넌트 최상위 태그 바로 아래의 <section>에만 적용된다.
+
+
+3. 기능 구현하기
+State는 App 컴포넌트에 만들어야 한다.
+
+
+State를 이용해 카운터 기능 구현하기
+App.js 파일을 다음과 같이 수정한다.
+import "./App.css";
+import { useState } from "react";
+import Controller from "./component/Controller";
+import Viewer from "./component/Viewer";
+
+function App() {
+  const [count, setCount] = useState(0);
+  const handleSetCount = (value) => {
+    setCount(count + value);
+  };
+
+  return (
+    <div className="App">
+      <h1>Simple Counter</h1>
+      <section>
+        <Viewer count={count} /> 
+      </section>
+      <section>
+        <Controller handleSetCount={handleSetCount} /> 
+      </section>
+    </div>
+  );
+}
+export default App;
+<Viewer count={count} />는 Viewer 컴포넌트에 State 변수 count의 값을 Props로 전달한다.
+<Controller handleSetCount={handleSetCount} />는 Controller 컴포넌트에 State 값을 변경하는 함수 setCount를 Props로 전달한다.
+
+
+Viewer 컴포넌트에서 App에서 받은 Props를 페이지에 렌더링 하도록 Viewer.js를 수정한다.
+const Viewer = ({ count }) => {
+  return (
+    <div>
+      <div>현재 카운트 : </div>
+      <h1>{count}</h1>
+    </div>
+  );
+};
+export default Viewer;
+
+
+App 컴포넌트에서 함수 handleSetCount를 받아 버튼의 이벤트 핸들러로 사용하도록 Controller.js를 수정한다.
+const Controller = ({ handleSetCount }) => {
+  return (
+    <div>
+      <button onClick={() => handleSetCount(-1)}>-1</button>
+      <button onClick={() => handleSetCount(-10)}>-10</button>
+      <button onClick={() => handleSetCount(-100)}>-100</button>
+      <button onClick={() => handleSetCount(100)}>+100</button>
+      <button onClick={() => handleSetCount(10)}>+10</button>
+      <button onClick={() => handleSetCount(1)}>+1</button>
+    </div>
+  );
+};
+export default Controller;
+
+
+
+
+리액트는 State 값이나 set함수를 여러 컴포넌트에서 사용하는 경우, 이들을 상위 컴포넌트에서 관리한다. 
+리액트에서는 이 기능을 ‘State 끌어올리기'라고 한다.
+
+
+리액트답게 설계하기
+컴포넌트 간에 데이터를 전달할 때는 Props를 사용한다.
+전달 방향은 언제나 부모로부터 자식에게 전달하는 방식이다.
+리액트의 이러한 데이터 전달 특징을 ‘단방향 데이터 흐름’이라고 한다.
+State를 변경하는 이벤트는 자식에서 부모를 향해 역방향으로 전달되어야 한다.
+
+
+
+다음과 같이 화면에 출력된다.
+
+
+1. 리액트 컴포넌트와 라이프 사이클
+리액트 컴포넌트의 라이프 사이클은 마운트, 업데이트, 언마운트로 구분한다.
+
+
+
+마운트(Mount): 컴포넌트를 페이지에 처음 렌더링할 때를 말한다.
+업데이트(Update): State나 Props의 값이 바뀌거나 부모 컴포넌트가 리렌더해 자신도 리렌더 될 때를 말한다.
+언마운트(Unmount): 더 이상 페이지에 컴포넌트를 렌더링 하지 않을 때를 말한다.
+
+
+라이프 사이클 제어 (Lifecylcle Control): 라이프 사이클을 이용하여 여러 유용한 작업을 실행하는 것을 말한다.
+
+
+
+2. useEffect
+함수 useEffect는 어떤 값이 변경될 때마다 특정 코드를 실행하는 리액트 훅이다.
+
+하나의 값 검사하기
+App.js를 다음과 같이 수정한다.
+import { useState, useEffect } from "react"; 
+(...)
+
+function App() {
+  const [count, setCount] = useState(0);
+  const handleSetCount = (value) => {
+    setCount(count + value);
+  };
+
+  useEffect(() => { 
+    console.log("count 업데이트: ", count);
+  }, [count]);
+
+  return (
+    <div className="App">
+      <h1>Simple Counter</h1>
+      <section>
+        <Viewer count={count} />
+      </section>
+      <section>
+        <Controller handleSetCount={handleSetCount} />
+      </section>
+    </div>
+  );
+}
+export default App;
+
+
+useEffect(() => 는 useEffect를 호출하고 두 개의 인수를 전달한다. 
+첫 번째 인수로 콜백 함수를, 두 번째 인수로 배열을 전달한다.
+
+
+useEffect의 용법
+
+useEffect(callback, [deps])
+          콜백 함수 의존성 배열
+두 번째 인수로 전달한 배열을 의존성 배열(Dependency Array, 줄여서 deps)이라고 한다.
+useEffect는 이 배열 요소의 값이 변경되면 첫 번째 인수로 전달한 콜백함수를 실행한다.
+
+
+여러 개의 값 검사하기 
+State 변수 text의 값이 바뀌어도 콜백 함수를 실행하도록 App.js를 다음과 같이 수정한다.
+(...)
+function App() {
+  const [count, setCount] = useState(0);
+  const [text, setText] = useState(""); 
+  const handleSetCount = (value) => {
+    setCount(count + value);
+  };
+  const handleChangeText = (e) => { 
+    setText(e.target.value);
+  };
+
+  useEffect(() => {
+    console.log("업데이트: ", text, count);
+  }, [count, text]);
+
+  return (
+    <div className="App">
+      <h1>Simple Counter</h1>
+      <section>
+        <input value={text} onChange={handleChangeText} /> 
+      </section>
+      <section>
+        <Viewer count={count} />
+      </section>
+      <section>
+        <Controller handleSetCount={handleSetCount} />
+      </section>
+    </div>
+  );
+}
+export default App;
+
+
+
+
+useEffect로 라이프 사이클 제어하기
+컴포넌트의 3단계 라이프 사이클 중 업데이트(Update)가 발생하면 특정 코드를 실행해보자.
+App 컴포넌트를 다음과 같이 수정한다.
+(...)
+function App() {
+  const [count, setCount] = useState(0);
+  const [text, setText] = useState("");
+
+  const handleSetCount = (value) => {
+    setCount(count + value);
+  };
+  const handleChangeText = (e) => {
+    setText(e.target.value);
+  };
+
+  useEffect(() => { 
+    console.log("컴포넌트 업데이트");
+  });
+  (..)
+}
+export default App;
+의존성 배열에 아무것도 전달하지 않으면, useEffect는 컴포넌트를 렌더링 할 때마다 콜백 함수를 실행한다.
+
+
+리렌더 될 때만 콜백 함수를 실행시키기
+
+App 컴포넌트를 다음과 같이 수정한다.
+import { useRef, useState, useEffect } from "react"; 
+(...)
+function App() {
+  (...)
+  const didMountRef = useRef(false); 
+
+  useEffect(() => { 
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    } else {
+      console.log("컴포넌트 업데이트!");
+    }
+  });
+  (...)
+}
+export default App;
+
+
+
+조건문 자세히 보기
+
+useEffect(() => { 
+    if (!didMountRef.current) { 
+      didMountRef.current = true;
+      return;
+    } else { 
+      console.log("컴포넌트 업데이트!");
+    }
+});
+
+
+마운트 시점(didMountRef=false)에 함수를 호출하면 아무것도 출력하지 않고 함수를 종료한다.
+업데이트 시점(didMountRef=true)에 함수를 호출하면 문자열을 콘솔에 출력한다.
+
+
+컴포넌트의 마운트 제어하기
+컴포넌트의 마운트 시점에 실행되는 코드를 작성해 보자.
+App 컴포넌트를 다음과 같이 수정한다.
+(...)
+function App() {
+  (...)
+  const didMountRef = useRef(false); 
+
+  useEffect(() => { 
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    } else {
+      console.log("컴포넌트 업데이트!");
+    }
+  });
+
+  useEffect(() => { 
+    console.log("컴포넌트 마운트");
+  }, []);
+
+	return (
+	  (...)
+	);
+}
+export default App;
+
+
+
+컴포넌트 언마운트 제어하기
+클린업(Cleanup) 기능: 특정 함수가 실행되고 종료된 후에, 미처 정리하지 못한 사항을 처리하는 일을 뜻한다.
+App 컴포넌트에서 함수 useEffect를 한 번 더 호출하도록 수정한다.
+(...)
+function App() {
+  (...)
+  useEffect(() => { 
+    setInterval(() => { 
+      console.log("깜빡");
+    }, 1000);
+  });
+	(...)
+}
+export default App;
+
+
+
+매우 빠른 속도로 ‘깜빡’ 문자열이 콘솔에 출력되는 이유
+
+버튼을 클릭해 State 값을 업데이트하면 App 컴포넌트를 리렌더 할 때마다 새로운 인터벌이 생성된다.
+그러나 기존 인터벌을 종료하지 않았기 때문에 여러 개의 인터벌이 중복으로 만들어져 출력 속도가 빨라지게 된다.
+
+
+useEffect의 클린업 기능 사용하기
+
+앞서 작성한 useEffect를 다음과 같이 수정한다.
+(...)
+function App() {
+  (...)
+  useEffect(() => { 
+    const intervalID = setInterval(() => { 
+      console.log("깜빡");
+    }, 1000);
+    return () => { 
+      console.log("클린업");
+      clearInterval(intervalID); 
+    };
+  });
+	(...)
+}
+export default App;
+이 함수는 컴포넌트를 렌더링 할 때마다 새 인터벌을 생성하고 기존 인터벌은 삭제한다.
+! 지금 작성한 useEffect를 모두 삭제 또는 주석 처리를 한다.
+
+
+클린업을 이용해 컴포넌트 언마운트 제어하기
+컴포넌트가 페이지에서 사라질 때 원하는 코드를 실행하도록 한다.
+component 폴더에 Even.js를 만들고 다음과 같이 작성한다.
+function Even() {
+  return <div>현재 카운트는 짝수입니다</div>;
+}
+export default Even;
+
+
+count 값이 짝수일 때, 컴포넌트를 페이지에 렌더링 하도록 App.js를 수정한다.
+(...)
+import Even from "./component/Even"; 
+
+function App() {
+  (...)
+  return (
+    <div className="App">
+      (...)
+      <section>
+        <Viewer count={count} />
+        {count % 2 === 0 && <Even />} 
+      </section>
+      (...)
+    </div>
+  );
+}
+export default App;
+{count % 2 === 0 && <Even />}는 AND 단축 평가이다.
+AND 연산자 앞의 식이 참이면 연산자 뒤의 Even 컴포넌트를 값으로 반환한다.
+
+
+컴포넌트가 언마운트될 때 콘솔에 특정 문자열을 출력하게 해 보자
+
+Even 컴포넌트를 다음과 같이 수정한다.
+import { useEffect } from "react";
+
+function Even() {
+  useEffect(() => { 
+    return () => {
+      console.log("Even 컴포넌트 언마운트");
+    };
+  }, []);
+
+  return <div>현재 카운트는 짝수입니다</div>;
+}
+export default Even;
+State 값이 홀수가 되면, Even 컴포넌트를 언마운트하면서 콘솔에 'Even 컴포넌트 언마운트'라는 문자열을 출력한다.
+
+
+3. 리액트 개발자 도구
+
+
+리액트 개발자 도구 설치하기
+[Chrome 웹 스토어] 페이지에 접속한다. https://chrome.google.com/webstore/category/extensions
+
+Chrome 웹 스토어
+
+Chrome에 사용할 유용한 앱, 게임, 확장 프로그램 및 테마를 찾아보세요.
+
+chrome.google.com
+React Developer Tools를 설치한다.
+
+
+리액트 개발자 도구의 기능 사용하기 
+
+컴포넌트 트리 살펴보기
+
+개발자 도구의 [Components] 탭을 이용한다.
+
+
+State 모니터링하기
+[Components] 탭에서 App를 클릭해 첫 번째 State 값을 확인한다.
+
+
+Props 모니터링하기
+[Components] 탭에서 Viewer 컴포넌트를 클릭한다.
+
+
+리렌더 하이라이트 기능 사용하기
+View Setting 아이콘을 클릭한다.
+대화상자 [General] 탭에서 “Highlight updates when component render.”라고 쓰여 있는 체크박스에 표시한다.
+
+
+
+이 기능을 활성화하면 컴포넌트를 렌더링 할 때마다 하이라이트가 나타난다.
+
+
+
+
+
