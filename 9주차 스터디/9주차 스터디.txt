@@ -1,0 +1,573 @@
+# [할 일 관리] 앱 만들기
+
+## 프로젝트 준비하기
+
+### 요구사항 분석하기
+
+1. 오늘 날짜 ex) Fri Nov 24 2023
+2. Todo List 작성 폼 + 추가 버튼
+3. Todo List (세부사항: 할 일, 날짜, 삭제 버튼)
+
+- Header: 오늘 날짜
+- TodoEditor: 새로운 할 일 등록
+- TodoList: 할 일 리스트를 렌더링
+- TodoItem: 각각의 할 일 정보, 완료 체크박스, 삭제 버튼
+
+### 리액트 앱 만들기
+
+```jsx
+npx create-react-app .
+```
+
+## UI 구현하기
+
+### 페이지 레이아웃 만들기
+
+자식 컴포넌트 배치
+
+```jsx
+import "./App.css";
+
+function App() {
+  return (
+    <div className="App">
+      <div>Header</div>
+      <div>Todo Editor</div>
+      <div>Todo List</div>
+    </div>
+  );
+}
+export default App;
+```
+
+```css
+body {
+  margin: 0px; /* 외부 여백 전부 삭제 */
+}
+```
+
+```css
+.App {
+  max-width: 500px; 
+  width: 100%; 
+  margin: 0 auto; /* 위아래 0, 좌우 자동 */
+  box-sizing: border-box; /* 내부 여백이 요소의 크기에 영향X */
+  padding: 20px; /* 내부 여백 20px */
+  border: 1px solid gray; /* 컴포넌트 경계 실선 */
+	display: flex; /* 요소 수평 배치 */
+  flex-direction: column; /* 수직 배치 */
+  gap: 30px; /* 자식 요소 간의 여백 */
+}
+```
+
+(👉ﾟヮﾟ)👉 [CSS Flexible Box Layout](https://developer.mozilla.org/ko/docs/Web/CSS/CSS_flexible_box_layout)
+
+✔️**CSS 공부 필요해**
+
+### Header 컴포넌트 만들기
+
+```jsx
+const Header = () => {
+  return (
+    <div className="Header">
+      <h3>오늘은 📅</h3> {/* 이모지 == 문자열 */}
+      <h1>{new Date().toDateString()}</h1> 
+    </div>
+  );
+};
+export default Header;
+```
+
+```css
+.Header h1 { 
+  margin-bottom: 0px;
+  color: #1f93ff;
+}
+```
+
+```jsx
+import "./App.css";
+import Header from "./component/Header";
+
+function App() {
+  return (
+    <div className="App">
+      <Header />
+      <div>Todo Editor</div>
+      <div>Todo List</div>
+    </div>
+  );
+}
+export default App;
+```
+
+### TodoEditor 컴포넌트 만들기
+
+```jsx
+import "./TodoEditor.css";
+
+const TodoEditor = () => {
+  return (
+    <div className="TodoEditor">
+      <h4>새로운 Todo 작성하기 ✏️ </h4>
+      <div className="editor_wrapper">
+        <input placeholder="새로운 Todo..." />
+        <button>추가</button>
+      </div>
+    </div>
+  );
+};
+export default TodoEditor;
+```
+
+```css
+.TodoEditor .editor_wrapper {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+}
+
+.TodoEditor input {
+  flex: 1;
+  box-sizing: border-box;
+  border: 1px solid rgb(220, 220, 220);
+  border-radius: 5px;
+  padding: 15px;
+}
+
+.TodoEditor input:focus { /* 입력 폼을 클릭 했을 때 */
+  outline: none;
+  border: 1px solid #1f93ff;
+}
+
+.TodoEditor button {
+  cursor: pointer; /* 버튼 호버 시 모양이 🤚으로 변경됨 */
+  width: 80px;
+  border: none;
+  background-color: #1f93ff;
+  color: white;
+  border-radius: 5px;
+}
+```
+
+```jsx
+import "./App.css";
+import Header from "./component/Header";
+import TodoEditor from "./component/TodoEditor";
+
+function App() {
+  return (
+    <div className="App">
+      <Header />
+      <TodoEditor />
+      <div>Todo List</div>
+    </div>
+  );
+}
+export default App;
+```
+
+### TodoList 컴포넌트 만들기
+
+```jsx
+import "./TodoList.css";
+
+const TodoList = () => {
+  return (
+    <div className="TodoList">
+      <h4>Todo List 🌱</h4>
+      <input className="searchbar" placeholder="검색어를 입력하세요" />
+    </div>
+  );
+};
+export default TodoList;
+```
+
+```css
+/* 검색 폼에 스타일 적용 */
+.TodoList .searchbar {
+  margin-bottom: 20px;
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid rgb(220, 220, 220);
+  box-sizing: border-box;
+  padding-top: 15px;
+  padding-bottom: 15px;
+}
+
+/* 검색 폼을 클릭했을 때의 스타일 적용 */
+.TodoList .searchbar:focus {
+  outline: none;
+  border-bottom: 1px solid #1f93ff;
+}
+```
+
+```jsx
+import "./App.css";
+import Header from "./component/Header";
+import TodoEditor from "./component/TodoEditor";
+import TodoList from "./component/TodoList";
+
+function App() {
+  return (
+    <div className="App">
+      <Header />
+      <TodoEditor />
+      <TodoList />
+    </div>
+  );
+}
+export default App;
+```
+
+### TodoItem 컴포넌트 만들기
+
+```jsx
+import "./TodoItem.css";
+
+const TodoItem = () => {
+  return (
+    <div className="TodoItem">
+      <div className="checkbox_col"> {/*할 일 가장 왼쪽에 체크박스 배치*/}
+        <input type="checkbox" />
+      </div>
+      <div className="title_col">할 일</div> {/* 임시 */}
+      <div className="date_col">{new Date().toLocaleDateString()}</div> 
+      <div className="btn_col"> 
+        <button>삭제</button>
+      </div>
+    </div>
+  );
+};
+export default TodoItem;
+```
+
+### ****TodoList에 TodoItem 컴포넌트 배치하기****
+
+```jsx
+import TodoItem from "./TodoItem";
+import "./TodoList.css";
+
+const TodoList = () => {
+  return (
+    <div className="TodoList">
+      <h4>Todo List 🌱</h4>
+      <input className="searchbar" placeholder="검색어를 입력하세요" />
+      <div className="list_wrapper"> {/* 임시 */}
+        <TodoItem />
+        <TodoItem />
+        <TodoItem />
+      </div>
+    </div>
+  );
+};
+export default TodoList;
+```
+
+```css
+(...)
+.TodoList .list_wrapper { /* 아이템끼리 간격 */
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+```
+
+```css
+/* 할 일 아이템 박스 스타일 적용 */
+.TodoItem {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgb(240, 240, 240);
+}
+
+/* 체크박스를 감싼 박스에 스타일 적용 */
+.TodoItem .checkbox_col {
+  width: 20px;
+}
+
+/* 할 일 텍스트를 감싼 박스에 스타일 적용 */
+.TodoItem .title_col {
+  flex: 1;
+}
+
+/* 할 일 아이템 등록 시간을 감싼 박스에 스타일 적용 */
+.TodoItem .date_col {
+  font-size: 14px;
+  color: gray;
+}
+
+/* 삭제 버튼에 스타일 적용 */
+.TodoItem .btn_col button {
+  cursor: pointer;
+  color: gray;
+  font-size: 14px;
+  border: none;
+  border-radius: 5px;
+  padding: 5px;
+}
+```
+
+```css
+.App {
+  max-width: 500px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: 20px;
+  /* border: 1px solid gray; <- 삭제하거나 주석 처리 */
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+```
+
+## 기능 구현 준비하기
+
+### CRUD
+
+- Create: 할 일 아이템 생성
+- Read: 할 일 아이템 렌더링
+- Update: 할 일 아이템 수정
+- Delete: 할 일 아이템 삭제
+
+### 기초 데이터 설정하기
+
+```jsx
+import { useState } from "react";
+(..)
+
+function App() {
+  const [todo, setTodo] = useState([]);
+
+  return (
+    (...)
+  );
+}
+export default App;
+```
+
+### 데이터 모델링하기
+
+![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/6e91f198-8ab1-4084-8764-bcd7b8ca4af6/9a5216a0-d86c-4313-a3ae-36f9142e4e7e/Untitled.png)
+
+```jsx
+{
+  id: 0, 
+  isDone: false, 
+  content: "React 공부하기", 
+  createdDate: new Date().getTime(), 
+}
+```
+
+### Mok ****데이터 설정하기****
+
+Mok 데이터: 모조품 데이터, 임시 데이
+
+```jsx
+(...)
+const mockTodo = [ /* 백이랑 연결 전 데이터 없을 때 목 데이터로 채우기 */
+  {
+    id: 0,
+    isDone: false,
+    content: "React 공부하기",
+    createdDate: new Date().getTime(),
+  },
+  {
+    id: 1,
+    isDone: false,
+    content: "빨래 널기",
+    createdDate: new Date().getTime(),
+  },
+  {
+    id: 2,
+    isDone: false,
+    content: "노래 연습하기",
+    createdDate: new Date().getTime(),
+  },
+];
+
+function App() {
+  const [todo, setTodo] = useState(mockTodo); 
+
+  return (
+    (...)
+  );
+}
+export default App;
+```
+
+## Create: 할 일 추가하기
+
+### ****기능 흐름 살펴보기****
+
+![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/6e91f198-8ab1-4084-8764-bcd7b8ca4af6/0451f9ea-53ad-4150-b917-0ae6ddb9fc81/Untitled.png)
+
+1. 사용자가 새로운 할 일을 입력한다.
+2. TodoEditor 컴포넌트에 있는 <추가> 버튼을 클릭한다.
+3. TodoEditor 컴포넌트는 부모인 App에게 아이템 추가 이벤트가 발생했음을 알리고 사용자가 추가한 할 일 데이터를 전달한다.
+4. App 컴포넌트는 TodoEditor 컴포넌트에서 받은 데이터를 이용해 새 아이템을 추가한 배열을 만들고 State 변수 todo 값을 업데이트한다.
+5. TodoEditor 컴포넌트는 자연스러운 사용자 경험을 위해 할 일 입력 폼을 초기화한다.
+
+### ****아이템 추가 함수 만들기****
+
+```jsx
+import { useState, useRef } from "react";
+(...)
+
+function App() {
+	const [todo, setTodo] = useState(mockTodo);
+  const idRef = useRef(3); /* 초기값이 3인 Ref 객체 생성, idRef에 저장 */
+
+	const onCreate = (content) => { 
+    const newItem = {
+      id: idRef.current, 
+      content,
+      isDone: false,
+      createdDate: new Date().getTime(),
+    };
+    setTodo([newItem, ...todo]);
+    idRef.current += 1; 
+  };
+
+  return (
+    <div className="App">
+      <Header />
+      <TodoEditor onCreate={onCreate} /> {/* props로 전달 */}
+      <TodoList />
+    </div>
+  );
+}
+export default App;
+```
+
+### ****아이템 추가 함수 호출하기****
+
+```jsx
+import { useState } from "react";
+import "./TodoEditor.css";
+
+const TodoEditor = ({ onCreate }) => { /* 전달받은 props 가져오기 */
+  const [content, setContent] = useState(""); /* 폼 데이터 저장할 State 변수 */
+  const onChangeContent = (e) => { /* 이벤트 핸들러 */
+    setContent(e.target.value);
+  };
+	const onSubmit = () => { /* 이벤트 핸들러 */
+    onCreate(content);
+  };
+
+  return (
+    <div className="TodoEditor">
+      <h4>새로운 Todo 작성하기 ✏ </h4>
+      <div className="editor_wrapper">
+        <input 
+          value={content}
+          onChange={onChangeContent}
+          placeholder="새로운 Todo..."
+        />
+        <button onClick={onSubmit}>추가</button>
+      </div>
+    </div>
+  );
+};
+export default TodoEditor;
+```
+
+### ****Create 완성도 높이기****
+
+**빈 입력 방지하기**
+
+아무것도 입력하지 않은 상태로 아이템 추가하는 것 방지
+
+→ 빈 입력란에 포커스를 주는 기능 구현
+
+```jsx
+import { useState, useRef } from "react";
+import "./TodoEditor.css";
+
+const TodoEditor = ({ onCreate }) => {
+  const [content, setContent] = useState("");
+  const inputRef = useRef(); /* 입력 폼을 제어할 객체 생성 */
+
+  (...)
+  const onSubmit = () => {
+    if (!content) /* 빈 문자열이면, current으로 저장한 요소에 포커스하고 종료 */
+      inputRef.current.focus();
+      return;
+    }
+    onCreate(content);
+  };
+
+  return (
+    <div className="TodoEditor">
+      <h4>새로운 Todo 작성하기 ✏ </h4>
+      <div className="editor_wrapper">
+        <input
+          ref={inputRef} {/* inputRef는 현재값, 요소 저장 */}
+          value={content}
+          onChange={onChangeContent}
+          placeholder="새로운 Todo..."
+        />
+        <button onClick={onSubmit}>추가</button>
+      </div>
+    </div>
+  );
+};
+export default TodoEditor;
+```
+
+****아이템 추가 후 입력 폼 초기화하기****
+
+아이템 추가 → 자동으로 할 일 입력 폼을 초기화하는 기능 구현
+
+```jsx
+(...)
+const TodoEditor = ({ onCreate }) => {
+  (...)
+  const onSubmit = () => {
+    if (!content) {
+      inputRef.current.focus();
+      return;
+    }
+    onCreate(content);
+    setContent(""); 
+  };
+  (...)
+};
+export default TodoEditor;
+```
+
+****<Enter> 키를 눌러 아이템 추가하기****
+
+키보드 <엔터> 키 누름 == <추가> 버튼 클릭
+
+→ 키 입력 이벤트 구현
+
+```jsx
+(...)
+const TodoEditor = ({ onCreate }) => {
+  (...)
+  const onKeyDown = (e) => { /
+    if (e.keyCode === 13) { /* 자바 시간에 배운 키코드! */
+      onSubmit();
+    }
+  };
+  return(
+    <div className="TodoEditor">
+      <h4>새로운 Todo 작성하기 ✏ </h4>
+      <div className="editor_wrapper">
+        <input
+          ref={inputRef}
+          value={content}
+          onChange={onChangeContent}
+          onKeyDown={onKeyDown} 
+          placeholder="새로운 Todo..."
+        />
+        <button onClick={onSubmit}>추가</button>
+      </div>
+    </div>
+  )
+};
+export default TodoEditor;
