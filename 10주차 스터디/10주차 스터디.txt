@@ -1,0 +1,390 @@
+
+Read: 할 일 리스트 렌더링 하기
+Read 기능을 이용하면 배열에 저장한 여러 할 일 아이템을 반복해서 페이지에 렌더링 할 수 있다.
+
+
+
+배열을 리스트로 렌더링하기
+배열 todo를 TodoList 컴포넌트에 Props로 전달한다.
+(...)
+function App() {
+  (...)
+  return (
+    <div className="App">
+      <Header />
+      <TodoEditor onCreate={onCreate} />
+      <TodoList todo={todo} />
+    </div>
+  );
+}
+export default App;
+
+
+
+map을 이용한 HTML 반복하기
+TodoList 컴포넌트에서 배열 메서드 map을 이용해 HTML 요소를 반복해 렌더링 한다.
+import TodoItem from "./TodoItem";
+import "./TodoList.css";
+
+const TodoList = ({ todo }) => { // Props를 구조 분해 할당한다. 
+  return (
+    <div className="TodoList">
+      <h4>Todo List 🌱</h4>
+      <input className="searchbar" placeholder="검색어를 입력하세요" />
+      <div className="list_wrapper">
+        {todo.map((it) => ( // 배열 todo의 모든 요소를 순차적으로 순회하여 HTML로 변환한다. 
+          <div>{it.content}</div>
+        ))}
+      </div>
+    </div>
+  );
+};
+export default TodoList;
+
+map을 이용해 컴포넌트 반복하기
+map 메서드의 콜백 함수가 HTML이 아닌 컴포넌트를 반환하도록 수정한다.
+import TodoItem from "./TodoItem";
+import "./TodoList.css";
+
+const TodoList = ({ todo }) => { 
+  return (
+    <div className="TodoList">
+      <h4>Todo List 🌱</h4>
+      <input className="searchbar" placeholder="검색어를 입력하세요" />
+      <div className="list_wrapper">
+        {todo.map((it) => (
+          <TodoItem {...it} /> // TodoItem 컴포넌트에 it의 프로퍼티를 Props로 전달한다.
+        ))}
+      </div>
+    </div>
+  );
+};
+export default TodoList;
+
+
+TodoItem 컴포넌트에 전달된 Props를 컴포넌트에서 사용할 수 있도록 다음과 같이 수정한다.
+import "./TodoItem.css";
+
+const TodoItem = ({ id, content, isDone, createdDate }) => { // Props를 구조 분해 할당한다.
+  return (
+    <div className="TodoItem">
+      <div className="checkbox_col">
+        <input checked={isDone} type="checkbox" /> // 체크 여부를 isDone으로 설정한다.
+      </div>
+      <div className="title_col">{content}</div> // 할 일을 페이지에 표시하기 위해 렌더링한다. 
+      <div className="date_col">
+        {new Date(createdDate).toLocaleDateString()} // 문자열로 변환해 렌더링한다.
+      </div>
+      <div className="btn_col">
+        <button>삭제</button>
+      </div>
+    </div>
+  );
+};
+export default TodoItem;
+
+목 데이터의 할 일 아이템, 새로 입력한 아이템을 잘 렌더링한다.
+
+key 설정하기
+key: 리스트에서 각각의 컴포넌트를 구분하기 위해 사용하는 값이다.
+리스트의 각 컴포넌트를 key로 구분하지 않으면 생성, 수정, 삭제 연산이 불가능하다.
+TodoList 컴포넌트를 다음과 같이 수정한다.
+import TodoItem from "./TodoItem";
+import "./TodoList.css";
+
+const TodoList = ({ todo }) => {
+  return (
+    <div className="TodoList">
+      (...)
+      <div className="list_wrapper">
+        {todo.map((it) => (
+          <TodoItem key={it.id} {...it} /> // 컴포넌트에 key로 할 일 아이템의 id를 전달한다.
+        ))}
+      </div>
+    </div>
+  );
+};
+export default TodoList;
+리스트의 각 컴포넌트에 key로 할 일 아이템의 id를 전달하여 오류 발생을 멈추게 한다.
+map을 이용하여 컴포넌트를 리스트 형태로 반복적으로 렌더링 하려면 리스트 내의 key를 Props로 전달해야 한다.
+
+검색어에 따라 필터링하기
+TodoList 컴포넌트에서 특정 할 일을 검색하는 기능을 만들어보자.
+
+
+
+검색 기능 만들기
+TodoList의 검색 폼에서 검색어를 입력하면, 해당 문자열을 포함하는 할 일 아이템만 필터링해 보여준다.
+import { useState } from "react"; // react 라이브러리에서 useState 리액트 훅을 불러온다.
+(...)
+
+const TodoList = ({ todo }) => {
+  const [search, setSearch] = useState(""); 
+  const onChangeSearch = (e) => { // 검색 폼의 onChange 이벤트 핸들러 onChangeSearch를 만든다.
+    setSearch(e.target.value);
+  };
+
+  return (
+    <div className="TodoList">
+      <h4>Todo List 🌱</h4>
+      <input
+        value={search} // 검색 폼의 value로 State 변수 search를 설정한다.
+        onChange={onChangeSearch} // 검색 폼의 onChange 이벤트 핸들러를 onChangeSearch로 설정한다.
+        className="searchbar"
+        placeholder="검색어를 입력하세요"
+      />
+      <div className="list_wrapper">
+        {todo.map((it) => (
+          <TodoItem key={it.id} {...it} />
+        ))}
+      </div>
+    </div>
+  );
+};
+export default TodoList;
+
+
+
+
+사용자가 입력한 검색어에 따라 할 일 아이템을 필터링하는 기능을 만들어보자.
+(...)
+const TodoList = ({ todo }) => {
+  (...)
+  const getSearchResult = () => {
+    return search === ""
+      ? todo
+      : todo.filter((it) => it.content.includes(search)); 
+      // todo 배열에서 search의 내용과 일치하는 아이템만 필터링해 반환한다.
+  };
+
+  return (
+    <div className="TodoList">
+      (...)
+      <div className="list_wrapper">
+        {getSearchResult().map((it) => ( 
+        // 함수 getSearchResult의 결과값을 map 메서드를 이용해 리스트로 렌더링한다.
+          <TodoItem key={it.id} {...it} />
+        ))}
+      </div>
+    </div>
+  );
+};
+export default TodoList;
+
+대소 문자를 구별하지 못 한다.
+
+대소 문자를 구별하지 않게 하기
+toLowerCase() 메서드는 문자열에 있는 대문자를 모두 소문자로 바꿔 준다.
+(...)
+const getSearchResult = () => {
+    return search === ""
+      ? todo
+      : todo.filter((it) =>
+          it.content.toLowerCase().includes(search.toLowerCase())
+        );
+  };
+(...)
+
+
+
+Update: 할 일 수정하기
+틱(Tik): 체크 표시하는 것을 말한다.
+
+
+
+
+기능 흐름 살펴보기 
+
+사용자가 TodoItem의 체크 박스에 체크 표시를 한다.
+TodoItem 컴포넌트에서 함수 onUpdate를 호출하고, 틱 아이템의 id를 인수로 전달한다.
+App 컴포넌트의 함수 onUpdate는 틱 아이템의 상태를 토글 하기 위해 State 값을 업데이트한다. 
+App 컴포넌트의 State 값이 변경되면 TodoList에 전달하는 Props의 값 또한 변경한다. 
+TodoList는 변경된 State 값을 다시 리스트로 렌더링 하여 수정 사항을 반영한다.
+
+
+아이템 수정 함수 만들기
+App에 할 일 수정 함수 onUpdate를 생성하고 TodoList 컴포넌트에 Props로 전달한다.
+(...)
+function App() {
+  (...)
+  const onUpdate = (targetId) => { // TodoItem 체크박스에 틱이 발생했을 때 호출하는 함수이다.
+    setTodo(
+      todo.map((it) => { 
+        if (it.id === targetId) { // 배열 todo 에서 id가 targetId와 일치하는 요소를 찾으면,
+          return { // isDone 프로퍼티 값을 토글한 새 배열을 만들어 인수로 전달한다.
+            ...it,
+            isDone: !it.isDone,
+          };
+        } else {
+          return it;
+        }
+      })
+    );
+  };
+
+  return (
+    <div className="App">
+      <Header />
+      <TodoEditor onCreate={onCreate} />
+      <TodoList todo={todo} onUpdate={onUpdate} /> // Props로 함수 onUpdate를 전달한다.
+    </div>
+  );
+}
+export default App;
+
+
+
+
+삼항 연산자를 이용하여 간단하게 작성하여 본다.
+(...)
+const onUpdate = (targetId) => {
+    setTodo(
+      todo.map((it) =>
+        it.id === targetId ? { ...it, isDone: !it.isDone } : it
+      )
+    );
+};
+(...)
+
+
+
+
+TodoList에서 TodoItem 컴포넌트에 함수 onUpdate를 전달해야 하도록 TodoList 컴포넌트를 수정해 보자.
+(...)
+const TodoList = ({ todo, onUpdate }) => { // Props를 구조 분해 할당한다.
+  (...)
+  return (
+    <div className="TodoList">
+      (...)
+      <div className="list_wrapper">
+        {getSearchResult().map((it) => (
+          <TodoItem key={it.id} {...it} onUpdate={onUpdate} /> // 함수 onUpdate를 Props로 전달한다.
+        ))}
+      </div>
+    </div>
+  );
+};
+export default TodoList;
+리액트 컴포넌트는 바로 한 단계 아래의 자식 컴포넌트에만 데이터를 전달할 수 있다.
+따라서 한 단계 이상 떨어져 있는 자식 컴포넌트에 데이터를 전달하려면, 전달을 반복하는 수밖에 없다.
+이를 “Props가 마치 땅을 파고 내려가는 것 같다”라고 하여 ‘Props Drilling’이라고 한다.
+
+TodoItem 컴포넌트에서 아이템 수정 함수 호출하기
+TodoItem 컴포넌트에서 틱 이벤트가 발생하면 함수 onUpdate를 호출하도록 수정한다.
+import "./TodoItem.css";
+
+const TodoItem = ({ id, content, isDone, createdDate, onUpdate }) => { // Props를 구조 분해 할당한다.
+  const onChangeCheckbox = () => { // onUpdate를 호출하고 인수로 현재 틱이 발생한 할 일 아이템의 id를 전달한다.
+    onUpdate(id);
+  };
+
+  return (
+    <div className="TodoItem">
+      <div className="checkbox_col">
+        <input onChange={onChangeCheckbox} checked={isDone} type="checkbox" />
+      </div>
+      <div className="title_col">{content}</div>
+      <div className="date_col">
+        {new Date(createdDate).toLocaleDateString()}
+      </div>
+      <div className="btn_col">
+        <button>삭제</button>
+      </div>
+    </div>
+  );
+};
+export default TodoItem;
+
+정상적으로 업데이트 되었다.
+
+
+Delete: 할 일 삭제하기
+
+
+
+
+기능 흐름 살펴보기 
+
+삭제하려는 할 일 아이템에서 <삭제> 버튼을 클릭한다. 
+할 일을 삭제하는 함수 onDelete를 호출한다.
+<삭제> 버튼을 클릭하면 삭제할 할 일 아이템을 제외하고, 새 배열을 만들어 State 값을 업데이트한다. 
+State 변수 todo가 업데이트되면, App가 TodoList 컴포넌트에 전달한 Props의 값도 변경된다. 
+TodoList 컴포넌트는 Props의 값이 변경되면, 새로운 배열 todo로 할 일 리스트를 다시 렌더링 한다.
+
+
+아이템 삭제 함수 만들기 
+(...)
+function App() {
+  (...)
+  const onDelete = (targetId) => { // 매개변수 targetId에 삭제 할 일기 아이템의 id를 저장하고, 
+  // 해당 id 요소를 뺀 새 배열로 todo를 업데이트 함으로써 대상 아이템을 삭제한다. 
+    setTodo(todo.filter((it) => it.id !== targetId));
+  };
+
+  return (
+    <div className="App">
+      <Header />
+      <TodoEditor onCreate={onCreate} />
+      <TodoList todo={todo} onUpdate={onUpdate} onDelete={onDelete} /> 
+    </div>
+  );
+}
+export default App;
+
+TodoList가 Props로 받은 함수 onDelete를 다시 TodoItem 컴포넌트에 전달하도록 수정한다.
+(...)
+const TodoList = ({ todo, onUpdate, onDelete }) => { 
+  (...)
+  return (
+    <div className="TodoList">
+      (...)
+      <div className="list_wrapper">
+        {getSearchResult().map((it) => (
+          <TodoItem
+            key={it.id}
+            {...it}
+            onUpdate={onUpdate}
+            onDelete={onDelete} // 함수 onDelete를 리스트의 모든 TodoItem에 Props로 전달한다.
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+export default TodoList;
+
+TodoItem 컴포넌트에서 삭제 함수 호출하기
+TodoItem에서 <삭제> 버튼을 클릭하면 함수 onDelete를 호출하도록 구현한다.
+import "./TodoItem.css";
+
+const TodoItem = ({ id, content, isDone, createdDate, onUpdate, onDelete }) => { 
+  const onChangeCheckbox = () => {
+    onUpdate(id);
+  };
+  const onClickDelete = () => { // 함수 onDelete를 호출하고 인수로 해당 아이템의 id를 전달한다.
+    onDelete(id);
+  };
+
+  return (
+    <div className="TodoItem">
+      <div className="checkbox_col">
+        <input onChange={onChangeCheckbox} checked={isDone} type="checkbox" />
+      </div>
+      <div className="title_col">{content}</div>
+      <div className="date_col">
+        {new Date(createdDate).toLocaleDateString()}
+      </div>
+      <div className="btn_col">
+        <button onClick={onClickDelete}>삭제</button> 
+      </div>
+    </div>
+  );
+};
+export default TodoItem;
+
+<삭제> 버튼을 클릭하면 페이지에서 바로 삭제된다.
+
+
+
+
+
