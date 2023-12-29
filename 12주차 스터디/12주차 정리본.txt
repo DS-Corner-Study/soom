@@ -1,0 +1,305 @@
+# 12주차 스터디
+
+# 9장 컴포넌트 트리에 데이터 공급하기
+
+## Context
+
+리액트 컴포넌트 트리 전체를 대상으로 데이터를 공급하는 기능이다.
+
+### Context를 사용하는 이유
+
+- Props Drilling 문제를 해결하기 위해서
+
+→ 트리에서 2단계 이상 떨어져 있는 컴포넌트에 직접 데이터 전달하는 것이 불가능하다.
+
+→ 컴포넌트 사이의 데이터 교환 구조를 파악하기 어렵게 만든다.
+
+### Context란?
+
+리액트에서 같은 문맥 아래에 있는 컴포넌트 그룹에 데이터를 공급하는 기능
+
+### ContextAPI란?
+
+Context를 만들고 다루는 리액트 기능
+
+### 예시
+
+→ ContextAPI를 이용하여 Context를 만들고 컴포넌트 트리에 데이터를 공급하게 하자
+
+```jsx
+import React, { useContext } from 'react';
+const MyContext = React.createContext(defaultValue);
+
+function App() {
+	const data = 'data';
+	return (
+		<div>
+			<Header />
+			<MyContext.Provider value={data}> /*데이터 공급 역할*/
+				<Body />
+			</MyContext.Provider>
+		</div>
+	);
+}
+
+function Main() {
+	const data = useContext(MyContext); 
+/*자신이 속한 그룹의 Context가 제공하는 값을 불러오기*/
+}
+
+export default App;
+```
+
+## Context로 [할 일 관리] 앱 리팩토링하기
+
+리팩토링이란? 
+
+사용자에게 제공하는 기능은 변경하지 않으면서 내부 구조를 개선하는 작업 
+
+→ Props Drilling은 제거하고, 할 일 아이템의 기능은 변함없이 동작하도록 한다.
+
+### 어떻게 Context를 적용할지 생각해보기
+
+- TodoContext라는 Context 생성하기
+- App 컴포넌트 하위에 TodoContext.Provider 배치하기
+- TodoContext.Provider 하위에 TodoEditor, TodoList, TodoItem 컴포넌트 배치
+- App에서 todo, onCreate, onUpdate, onDelete를 하위로 전달하기
+
+### TodoContext를 만들어 데이터 공급하기
+
+```jsx
+import React, { useCallback, useReducer, useRef } from 'react';
+const TodoContext = React.createContext(); /*반드시 컴포넌트 밖에!*/
+
+function App() {
+	return (
+		<div className="App">
+			<Header />
+			<TodoContext.Provider value={{ todo, onCreate, onUpdate, onDelete }}>
+				<TodoEditor onCreate={onCreate} />
+				<TodoList todo={todo} onUpdate={onUpdate} onDelete={onDelete} />
+			</TodoContext.Provider>
+		</div>
+	);
+}
+
+export default App;
+```
+
+*Context에서 데이터를 받으므로 다른 경로로 Props를 받을 필요가 없다. 아래와 같이 수정할 것*
+
+```jsx
+import React, { useCallback, useReducer, useRef } from 'react';
+const TodoContext = React.createContext();
+
+function App() {
+	return (
+		<div className="App">
+			<Header />
+			<TodoContext.Provider value={{ todo, onCreate, onUpdate, onDelete }}>
+				<TodoEditor />
+				<TodoList />
+			</TodoContext.Provider>
+		</div>
+	);
+}
+
+export default App;
+```
+
+```jsx
+const TodoList = ({ todo, onUpdate, onDelete }) => {
+}
+
+TodoList.defaultProps = {
+	todo: [], /*todo의 기본값을 빈 배열로 하는 defaultProps를 설정하기*/
+};
+
+export default TodoList;
+```
+
+### TodoList 컴포넌트에서 Context 데이터 사용하기
+
+```jsx
+export const TodoContext = React.createContext();
+// App.js에서 export를 이용하여 TodoContext를 내보낸다.
+```
+
+```jsx
+import { useContext, useMemo, useState } from 'react';
+import { TodoContext } from "../App";
+
+const TodoList = ({ todo, onUpdate, onDelete }) => {
+	const storeData = useContext(TodoContext);
+	console.log(storeData);
+};
+
+TodoList.defaultProps = {
+	todo: [], /*todo의 기본값을 빈 배열로 하는 defaultProps를 설정하기*/
+};
+
+export default TodoList;
+```
+
+*Props를 매개변수로 구조 분해 할당하는 기존 코드 제거하도록 수정할 것*
+
+```jsx
+const TodoList = () => {
+const { todo, onUpdate, onDelete } = useContext(TodoContext);
+};
+
+export default TodoList;
+```
+
+### TodoItem 컴포넌트에서 Context 데이터 사용하기
+
+*Context에서 함수 onUpdate, onDelete를 직접 불러와서 사용하도록 수정할 것*
+
+```jsx
+const TodoList = () => {
+  const { todo } = useContext(TodoContext);
+
+  return (
+    <div className="TodoList">
+      <div className="list_wrapper">
+        {getSearchResult().map((it) => (
+          <TodoItem key={it.id} {...it} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default TodoList;
+```
+
+```jsx
+import React, { useContext } from "react";
+import { TodoContext } from "../App";
+
+const TodoItem = ({ id, content, isDone, createdDate }) => {
+	const { onUpdate, onDelete } = useContext(TodoContext);
+};
+
+export default React.memo(TodoItem);
+```
+
+### TodoEditor 컴포넌트에 데이터 공급하기
+
+*TodoEditor 컴포넌트가 onCreate 함수를 TodoContext에서 받도록 수정할 것* 
+
+```jsx
+import { useState, useRef, useContext } from "react";
+import { TodoContext } from "../App";
+
+const TodoEditor = () => {
+	const { onCreate } = useContext(TodoContext);
+};
+```
+
+### 리팩토링이 잘 되었는지 확인하기 1
+
+리팩토링이란? 사용자에게 제공하는 기능은 그대로 유지하면서 내부 구조만 변경하여 개선하는 일
+
+```jsx
+const TodoItem = ({ id, content, isDone, createdDate }) => {
+  console.log(`${id} TodoItem 업데이트`);
+};
+
+export default React.memo(TodoItem);
+```
+
+⚠️문제 발생
+
+### 문제의 원인 파악하기
+
+TodoItem 컴포넌트가 불필요한 상황에서도 리렌더되고 있다.
+
+→ todo가 변하면, TodoContext.Provider에서 전달하는 모든 Props가 바뀐다.
+
+### 구조 재설계하기
+
+Context를 역할에 따라 분리한다.
+
+- TodoStateContext: todo가 업데이트되면 영향을 받는 컴포넌트를 위한 Context
+- TodoDispatchContext: dispatch 함수 onCreate, onDelete, onUpdate가 변경되면 영향을 받는 컴포넌트를 위한 Context
+
+### 재설계된 구조로 변경하기
+
+Context를 역할별로 분리하여 최적화 문제가 생기지 않도록 리팩토링하기
+
+```jsx
+export const TodoStateContext = React.createContext();
+export const TodoDispatchContext = React.createContext();
+
+function App() {
+return (
+    <div className="App">
+      <Header />
+      <TodoStateContext.Provider value={todo}>
+				<TodoDispatchContext.Provider value={{ onCreate, onUpdate, onDelete }}>
+	        <TodoEditor />
+	        <TodoList />
+				</TodoDispatchContext.Provider>
+      </TodoStateContext.Provider>
+    </div>
+  );
+}
+
+export default App;
+```
+
+*useMemo를 이용하여 TodoDispatchContext.Providerdp 전달할 dispatch 함수를 다시 생성하지 않도록 수정할 것*
+
+```jsx
+import React, { useMemo, useReducer, useRef, useCallback } from "react";
+
+function App() {
+const memoizedDispatches = useMemo(() => {
+	return { onCreate, onUpdate, onDelete };
+}, []);
+
+return (
+    <div className="App">
+      <Header />
+      <TodoStateContext.Provider value={todo}>
+				<TodoDispatchContext.Provider value={memoizedDispatches}>
+	        <TodoEditor />
+	        <TodoList />
+				</TodoDispatchContext.Provider>
+      </TodoStateContext.Provider>
+    </div>
+  );
+}
+
+export default App;
+```
+
+*TodoDispatchContext에서 함수 onCreate만 받도록 수정할 것*
+
+```jsx
+import { TodoDispatchContext } from "../App";
+
+const TodoEditor = () => {
+	const { onCreate } = useContext(TodoDispatchContext);
+};
+
+export default TodoEditor;
+```
+
+*TodoDispatchContext에서 함수 onUpdate, onDelete만 받도록 수정할 것*
+
+```jsx
+import { TodoDispatchContext } from "../App";
+
+const TodoItem = ({ id, content, isDone, createdDate }) => {
+	console.log(`${id} TodoItem 업데이트`);
+  const { onUpdate, onDelete } = useContext(TodoDispatchContext);
+};
+
+export default React.memo(TodoItem);
+```
+
+### 리팩토링이 잘 되었는지 확인하기 2
+
+새로운 할 일 아이템을 생성하면 생성한 TodoItem만 렌더링하고 나머지 컴포넌트는 더이상 리렌더되지 않는다.
